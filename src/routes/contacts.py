@@ -35,3 +35,13 @@ async def update_contact(body: ContactUpdateSchema, contact_id: int = Path(ge=1)
 async def delete_contact(contact_id: int = Path(ge=1), db: AsyncSession = Depends(get_db)):
     contact = await repositories_contacts.delete_contact(contact_id, db)
     return contact
+
+@router.get('/search/', response_model=list[ContactResponse])
+async def search_contacts(query: str = Query(..., min_length=1), db: AsyncSession = Depends(get_db)):
+    contacts = await repositories_contacts.search_contacts(query, db)
+    return contacts
+
+@router.get('/upcoming-birthdays/', response_model=list[ContactResponse])
+async def get_upcoming_birthdays(days: int = Query(default=7, ge=1), db: AsyncSession = Depends(get_db)):
+    contacts = await repositories_contacts.get_contacts_upcoming_birthdays(days, db)
+    return contacts
