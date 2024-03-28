@@ -31,12 +31,22 @@ async def get_contacts_upcoming_birthdays(days: int, db: AsyncSession):
     today = datetime.now().date()
     end_date = today + timedelta(days=days)
     stmt = select(Contact).filter(
-        func.extract('day', Contact.birthday) >= today.day,
-        func.extract('day', Contact.birthday) <= end_date.day,
-        func.extract('month', Contact.birthday) == end_date.month
+        Contact.birthday.between(today, end_date)
     )
     contacts = await db.execute(stmt)
     return contacts.scalars().all()
+
+
+# async def get_contacts_upcoming_birthdays(days: int, db: AsyncSession):
+#     today = datetime.now().date()
+#     end_date = today + timedelta(days=days)
+#     stmt = select(Contact).filter(
+#         func.extract('day', Contact.birthday) >= today.day,
+#         func.extract('day', Contact.birthday) <= end_date.day - days,
+#         func.extract('month', Contact.birthday) == end_date.month
+#     )
+#     contacts = await db.execute(stmt)
+#     return contacts.scalars().all()
 
 async def create_contact(body: ContactSchema, db: AsyncSession):
     contact = Contact(**body.model_dump(exclude_unset=True)) # (title=body.title)
